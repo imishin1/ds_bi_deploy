@@ -55,7 +55,7 @@ run_playbook() {
     echo "Начало установки"
     cd "$HOME/ds_bi_deploy" && ansible-playbook -i "localhost," -c local ./playbooks_examples/install_with_redis.yml
     echo "Установка успешно завершена"
-    echo "Superset доступен по порту 8088"
+    echo "DS.BI доступен по порту 8088"
 }
 
 # Основная логика скрипта
