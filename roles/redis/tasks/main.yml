@@ -1,0 +1,29 @@
+---
+- name: Install Redis
+  apt:
+    name: redis-server
+    state: present
+  become: true
+
+- name: Configure Redis to start on boot
+  systemd:
+    name: redis
+    enabled: yes
+
+- name: Create Redis systemd service file
+  template:
+    src: redis.service.j2
+    dest: /etc/systemd/system/redis.service
+  become: true
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+  become: true
+
+- name: Start Redis service
+  systemd:
+    name: redis
+    state: started
+    enabled: yes
+  become: true

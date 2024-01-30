@@ -1,0 +1,38 @@
+---
+- name: Superset setup tasks
+  block:
+    - name: Create Superset DB 
+      shell: "{{ superset_venv_path }}/bin/superset db upgrade"
+
+    - name: Fetch list of Superset users
+      command: "{{ superset_venv_path }}/bin/superset fab list-users"
+      register: superset_users
+      changed_when: false
+
+    - name: Check if admin user exists
+      set_fact:
+        admin_exists: "{{ 'admin' in superset_users.stdout }}"
+      changed_when: false
+
+    - name: Create Superset admin user
+      command: >
+        {{ superset_venv_path }}/bin/superset fab create-admin
+        --username '{{ superset_admin_user.username }}'
+        --firstname '{{ superset_admin_user.firstname }}'
+        --lastname '{{ superset_admin_user.lastname }}'
+        --email '{{ superset_admin_user.email }}'
+        --password '{{ superset_admin_user.password }}'
+      when: not admin_exists
+
+    - name: Add examples
+      command: "{{ superset_venv_path }}/bin/superset load_examples"
+      when: load_examples | default(false) | bool
+
+    - name: Create default roles and permissions
+      command: "{{ superset_venv_path }}/bin/superset init"
+      
+  environment:
+    SUPERSET_CONFIG_PATH: "{{ superset_config_dir }}/superset_config.py"
+    PYTHONPATH: "{{ superset_config_dir }}:{{ ansible_env.PYTHONPATH | default('') }}"
+    FLASK_APP: "superset"
+  become_user: "{{ superset_user }}"

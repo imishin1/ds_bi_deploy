@@ -1,0 +1,28 @@
+---
+- name: Get Python version
+  command: python3 --version
+  register: python_version_full
+
+- name: Extract major and minor version
+  set_fact:
+    python_version: "{{ python_version_full.stdout | regex_search('(?P<major>\\d+)\\.(?P<minor>\\d+)') }}"
+
+- name: Deploy superset.service for systemd
+  template:
+    src: superset.service.j2
+    dest: /lib/systemd/system/superset.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: 
+    - Ensure superset is enabled and started
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Restart Superset service
+  systemd:
+    name: superset
+    state: restarted
+    enabled: yes

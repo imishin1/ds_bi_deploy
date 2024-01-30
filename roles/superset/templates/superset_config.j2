@@ -1,0 +1,152 @@
+from flask_appbuilder.security.manager import AUTH_DB, AUTH_OAUTH
+from superset.superset_typing import CacheConfig
+
+# ---------------------------------------------------------
+# Superset specific config
+# ---------------------------------------------------------
+
+# Your App secret key
+SECRET_KEY = '{{ superset_secret_key }}'
+
+# The SQLAlchemy connection string.
+SQLALCHEMY_DATABASE_URI = '{{ superset_db_uri }}'
+
+# ------------------------------
+# GLOBALS FOR APP Builder
+# ------------------------------
+# Uncomment to setup Your App name
+APP_NAME = '{{ app_name }}'
+
+# ----------------------------------------------------
+# AUTHENTICATION CONFIG
+# ----------------------------------------------------
+AUTH_TYPE = AUTH_DB
+
+# Setup default language
+BABEL_DEFAULT_LOCALE = "ru"
+# The allowed translation for you app
+LANGUAGES = {
+    'en': {'flag': 'us', 'name': 'English'},
+    'ru': {'flag': 'ru', 'name': 'Russian'},
+}
+
+# The default user self registration role
+AUTH_USER_REGISTRATION_ROLE = 'Public'
+# Will allow user self registration
+AUTH_USER_REGISTRATION = False
+# Set public role like Gamma
+PUBLIC_ROLE_LIKE_GAMMA = False
+
+# ---------------------------------------------------
+# Image and file configuration
+# ---------------------------------------------------
+# The file upload folder, when using models with files
+UPLOAD_FOLDER = "/opt/superset/uploads/"
+
+# The image upload folder, when using models with images
+IMG_UPLOAD_FOLDER = "/opt/superset/images/"
+
+# Set this API key to enable Mapbox visualizations
+MAPBOX_API_KEY = '{{ mapbox_api_key }}'
+
+# CORS Options
+ENABLE_CORS = False
+
+# Allow for javascript controls components
+# this enables programmers to customize certain charts (like the
+# geospatial ones) by inputing javascript in controls. This exposes
+# an XSS security vulnerability
+ENABLE_JAVASCRIPT_CONTROLS = False
+
+
+# Extract and use X-Forwarded-For/X-Forwarded-Proto headers?
+ENABLE_PROXY_FIX = False
+
+# Add custom roles
+ADD_CUSTOM_ROLES = False
+
+# PATCHUP_EMAIL_BASE
+
+
+# Roles that are controlled by the API / Superset and should not be changes
+# by humans.
+ROBOT_PERMISSION_ROLES = ['Public', 'Gamma', 'Alpha', 'Admin', 'sql_lab']
+
+# Superset dashboard position json data limit
+SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 65535
+
+#
+# Flask session cookie options
+#
+# See https://flask.palletsprojects.com/en/1.1.x/security/#set-cookie-options
+# for details
+#
+SESSION_COOKIE_HTTPONLY = False  # Prevent cookie from being read by frontend JS?
+SESSION_COOKIE_SECURE =  False # Prevent cookie from being transmitted over non-tls?
+# Be explicit in allowing embedding superset dashboards in other sites
+# Ref: https://github.com/apache/incubator-superset/issues/8382
+SESSION_COOKIE_SAMESITE = None  # One of [None, 'Lax', 'Strict']
+
+# This is an important setting, and should be lower than your
+# [load balancer / proxy / envoy / kong / ...] timeout settings.
+# You should also make sure to configure your WSGI server
+# (gunicorn, nginx, apache, ...) timeout setting to be <= to this setting
+SUPERSET_WEBSERVER_TIMEOUT = 60
+
+
+LOG_LEVEL = 'INFO'
+
+
+from celery.schedules import crontab
+
+class CeleryConfig(object):
+    broker_url = 'redis://localhost:6379/0'
+    imports = (
+    'superset.sql_lab',
+)
+    result_backend = 'redis://localhost:6379/0'
+    worker_log_level = 'INFO'
+    worker_prefetch_multiplier = 10
+    task_acks_late = True
+    task_annotations = {
+    'sql_lab.get_sql_results': {
+        'rate_limit': '100/s',
+    },
+}
+        # Superset celery task cache warmup configs
+
+
+CELERY_CONFIG = CeleryConfig
+
+
+from cachelib.redis import RedisCache
+
+RESULTS_BACKEND = RedisCache(
+    host='localhost',
+    port=6379,
+    key_prefix='superset_results',
+)
+
+
+COMPRESS_REGISTER = False
+
+# ----------------------------------------------------
+# Visual Customizations
+# ----------------------------------------------------
+APP_ICON = "{{ superset_app_icon }}"
+FAVICONS = [{"href": "{{ superset_favicon }}"}]
+ENABLE_PROXY_FIX = True
+PROXY_FIX_CONFIG = {
+    "x_for": 1,  # X-Forwarded-For header set by proxy to identify client IP
+    "x_proto": 1, # X-Forwarded-Proto header set by proxy to identify the protocol (HTTP or HTTPS)
+    "x_host": 1,  # X-Forwarded-Host header set by proxy to identify the original host requested by the client
+    "x_port": 1,  # X-Forwarded-Port header set by proxy to identify the original port requested by the client
+    "x_prefix": 1 # X-Forwarded-Prefix header set by proxy to handle URL path prefix
+}
+
+DATA_CACHE_CONFIG = {
+    'CACHE_TYPE': 'RedisCache',
+    'CACHE_DEFAULT_TIMEOUT': 86400,
+    'CACHE_KEY_PREFIX': 'superset_results',
+    'CACHE_REDIS_URL': 'redis://localhost:6379/0'
+}

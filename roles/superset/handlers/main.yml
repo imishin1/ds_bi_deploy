@@ -1,0 +1,6 @@
+---
+- name: Ensure superset is enabled and started
+  ansible.builtin.systemd:
+    name: superset
+    enabled: yes
+    state: started

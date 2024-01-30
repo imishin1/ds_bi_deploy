@@ -1,0 +1,33 @@
+---
+# Версия суперсета
+superset_version: 2.1.1
+
+# Имя и группы пользователя для установки superset
+superset_user: superset
+superset_group: superset
+
+# Путь для создания виртуального окружения Superset
+superset_venv_path: /opt/superset
+# Путь до директории с конфигурацией
+superset_config_dir: /opt/superset/app
+
+# Путь до базы данных superset
+# superset_db_uri: 'postgresql://superset_user:superset@158.160.123.120:5432/superset_db'
+superset_db_uri: 'sqlite:///{{ superset_config_dir }}/superset.db?check_same_thread=false'
+
+# Если у вас есть ключ Mapbox, добавьте его сюда
+mapbox_api_key: '' 
+
+superset_admin_user:
+  username: admin
+  firstname: ''
+  lastname: ''
+  email: ''
+  password: admin
+
+load_examples: False
+
+local_path_to_app_logo: app_logo.png
+local_path_to_favicon: favicon.png
+
+app_name: "Дата решения"

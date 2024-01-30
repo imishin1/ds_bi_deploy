@@ -1,0 +1,72 @@
+---
+- name: Install apache-superset within the virtual environment
+  pip:
+    name: "apache-superset=={{ superset_version }}"
+    virtualenv: "{{ superset_venv_path }}"
+    virtualenv_python: python3
+  become: true
+
+- name: Change ownership of /opt/superset
+  file:
+    path: "{{ superset_venv_path }}"
+    owner:  "{{ superset_user }}"
+    group:  "{{ superset_group }}"
+    recurse: yes
+    state: directory
+  become: true
+
+- name: Install libraries for superset using pip from superset2_requirements.txt for version 2.*
+  block:
+  - name: Copy superset2_requirements.txt to the remote host
+    copy:
+      src: "{{ role_path }}/files/superset2_requirements.txt"
+      dest: "{{ superset_config_dir }}/superset2_requirements.txt"
+
+  - name: Install pip libraries for superset 2
+    pip:
+      requirements: "{{ superset_config_dir }}/superset2_requirements.txt"
+      state: present
+      executable: "{{ superset_venv_path }}/bin/pip"
+    become_user: "{{ superset_user }}"
+  when: 
+    - superset_version is version('2.0.0', '>=') 
+    - superset_version is version('3.0.0', '<')
+
+- name: Install libraries for superset using pip from superset3_requirements.txt for version 3.*
+  block:
+  - name: Copy superset3_requirements.txt to the remote host
+    copy:
+      src: "{{ role_path }}/files/superset3_requirements.txt"
+      dest: "{{ superset_config_dir }}/superset3_requirements.txt"
+
+  - name: Install pip libraries for superset
+    pip:
+      requirements: "{{ superset_config_dir }}/superset3_requirements.txt"
+      state: present
+      executable: "{{ superset_venv_path }}/bin/pip"
+  become_user: "{{ superset_user }}"
+  when: 
+    - superset_version is version('3.0.0', '>=') 
+
+- name: Find Superset static directory
+  shell: "{{ superset_venv_path }}/bin/python3 -c \"import superset, os; print(os.path.dirname(superset.__file__))\""
+  register: superset_static_dir_output
+  become: yes
+
+
+- name: Set Superset static directory
+  set_fact:
+    superset_static_dir: "{{ superset_static_dir_output.stdout }}"
+  become: yes
+
+- name: Copy app logo to Superset config directory
+  copy:
+    src: "{{ local_path_to_app_logo }}"
+    dest: "{{ superset_static_dir }}{{ superset_app_icon }}"
+  become: yes
+
+- name: Copy favicon to Superset config directory
+  copy:
+    src: "{{ local_path_to_favicon }}"
+    dest: "{{ superset_static_dir }}{{ superset_favicon }}"
+  become: yes
