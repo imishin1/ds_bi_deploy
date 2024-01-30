@@ -42,18 +42,18 @@ install_requirements() {
 # Функция для клонирования репозитория
 clone_repository() {
     echo -e "Подготовка файлов для установки"
-    if [ -d "$HOME/superset_deploy/.git" ]; then
-        cd "$HOME/superset_deploy"
+    if [ -d "$HOME/ds_bi_deploy/.git" ]; then
+        cd "$HOME/ds_bi_deploy"
         git pull
     else
-        git clone https://github.com/imishin1/superset_deploy.git "$HOME/superset_deploy"
+        git clone https://github.com/imishin1/ds_bi_deploy.git "$HOME/ds_bi_deploy"
     fi
 }
 
 # Функция для перехода в директорию и запуска Ansible playbook
 run_playbook() {
     echo "Начало установки"
-    cd "$HOME/superset_deploy" && ansible-playbook -i "localhost," -c local ./playbooks_examples/install_with_redis.yml
+    cd "$HOME/ds_bi_deploy" && ansible-playbook -i "localhost," -c local ./playbooks_examples/install_with_redis.yml
     echo "Установка успешно завершена"
     echo "Superset доступен по порту 8088"
 }
