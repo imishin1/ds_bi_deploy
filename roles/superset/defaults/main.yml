@@ -31,3 +31,5 @@ local_path_to_app_logo: app_logo.png
 local_path_to_favicon: favicon.png
 
 app_name: "Дата решения"
+
+superset_secret_key: "ZPwtIXVyOpx/JrLeXWvn5zcSw0s2sX6PVo3BDaRFmtmX93yA4P67/MCx"

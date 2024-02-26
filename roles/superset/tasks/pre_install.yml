@@ -77,12 +77,6 @@
       owner:  "{{ superset_user }}"
       group:  "{{ superset_group}}"
 
-  - name: Generate SECRET_KEY
-    command: openssl rand -base64 42
-    register: generated_secret_key
-    changed_when: false
-    become_user: "{{ superset_user }}"
-
   - name: Deploy superset_config.py from template
     template:
       src: superset_config.j2
@@ -90,7 +84,5 @@
       mode: '0644'
       owner:  "{{ superset_user }}"
       group:  "{{ superset_group }}"
-    vars:
-      superset_secret_key: "{{ generated_secret_key.stdout }}"
   
   become: yes
